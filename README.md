@@ -2,7 +2,15 @@
 
 - Opensourced wearable AI assistant
 
-# Story
+# Roadmap
+- [x] Add firebase web app
+- [x] Add 3d print files 
+- [ ] Add firmware
+- [ ] Write install instructions
+- [ ] Write assembling instructions
+- [ ] Rewrite web app to NextJS & Supabase
+
+# Story:
 
 ### How i made a wearable AI assistant for $50.
 
