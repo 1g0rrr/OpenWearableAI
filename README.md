@@ -5,7 +5,10 @@
 # Roadmap
 - [x] Add firebase web app
 - [x] Add 3d print files 
-- [ ] Add firmware
+- [x] Add firmware
+- [ ] Add skills for note taking
+- [ ] Add skills for buying list
+- [ ] Add Threads support
 - [ ] Write install instructions
 - [ ] Write assembling instructions
 - [ ] Rewrite web app to NextJS & Supabase
