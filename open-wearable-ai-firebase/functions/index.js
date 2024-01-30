@@ -34,33 +34,17 @@ async function _addTextMessageToAssistant(textMessage) {
     });
 
     const AddTaskSkill = require("./skills/Tasks/AddTaskSkill.js");
-    // const GetTodaysTasksSkill = require("./skills/GetTodaysTasksSkill.js");
-    // , new GetTodaysTasksSkill()
+    const GetTasksSkill = require("./skills/Tasks/GetTasksSkill.js");
+    const DeleteTaskSkill = require("./skills/Tasks/DeleteTaskSkill.js");
+    const EditTaskSkill = require("./skills/Tasks/EditTaskSkill.js");
 
-    const functional_tools = [new AddTaskSkill({
-        callback: async (input) => {
-            const { start_time, title } = input;
-            console.log("==== Event or task set ====", start_time, title)
-
-            console.log("SDASDASDASD", input)
-            const { initializeApp } = require("firebase-admin/app");
-            const { getFirestore } = require("firebase-admin/firestore");
-
-            const documentRef = getFirestore().collection("users").doc("dummy_user").collection("dailyObjects").doc("dummy_date");
-            // const documentRaw = await documentRef.get();
-            // const documentData = documentRaw.data();
-            const { v4: uuidv4 } = require("uuid");
-
-            const itemId = uuidv4();
-            await documentRef.update({
-                [`tasks.${itemId}.id`]: itemId,
-                [`tasks.${itemId}.title`]: title,
-                [`tasks.${itemId}.is_completed`]: false,
-                [`tasks.${itemId}.start_time_string`]: start_time ? start_time : "",
-            });
-            // console.log("==== documentData ====", "documentData", documentData);
-        }
-    })];
+    // Handle result of the skill
+    const functional_tools = [
+        new AddTaskSkill(),
+        new GetTasksSkill(),
+        new DeleteTaskSkill(),
+        new EditTaskSkill(),
+    ];
 
     const thread = await openai.beta.threads.create();
     const pedant_agent = await OpenAIAssistantRunnable.createAssistant({

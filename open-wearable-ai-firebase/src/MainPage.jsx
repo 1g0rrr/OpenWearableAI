@@ -121,17 +121,19 @@ const MainPage = () => {
                     </Box> */}
                 </Box>
 
-            </Box>
-            <div>
-                {/* <p>Recording: {recording} | Speaking: {speaking} | Transcribing: {transcribing} | Transcribed Text: {transcript.text}</p> */}
-                {/* <button onClick={() => handleStart()}>Start</button> */}
-                {/* <button onClick={() => pauseRecording()}>Pause</button> */}
-                {/* <button onClick={() => handleStop()}>Stop</button> */}
-                <button onClick={() => sendMessageToAssistant()}>sendMessageToAssistant</button>
-                <button onClick={() => listMessages()}>List messages</button>
-            </div>
-            <TextMessageInput />
 
+            </Box>
+            <Box sx={{ mt: 4 }}>
+                <div>
+                    {/* <p>Recording: {recording} | Speaking: {speaking} | Transcribing: {transcribing} | Transcribed Text: {transcript.text}</p> */}
+                    {/* <button onClick={() => handleStart()}>Start</button> */}
+                    {/* <button onClick={() => pauseRecording()}>Pause</button> */}
+                    {/* <button onClick={() => handleStop()}>Stop</button> */}
+                    <button onClick={() => sendMessageToAssistant()}>sendMessageToAssistant</button>
+                    <button onClick={() => listMessages()}>List messages</button>
+                </div>
+                <TextMessageInput />
+            </Box>
         </>
     )
 }

@@ -15,13 +15,26 @@ class AddTaskSkill extends StructuredTool {
 
     constructor(params) {
         super(...arguments);
-        this._callback = params.callback
     }
 
     async _call(input) {
-        if (this._callback) {
-            this._callback(input)
-        }
+        const { start_time, title } = input;
+
+        const { getFirestore } = require("firebase-admin/firestore");
+
+        const documentRef = getFirestore().collection("users").doc("dummy_user").collection("dailyObjects").doc("dummy_date");
+        // const documentRaw = await documentRef.get();
+        // const documentData = documentRaw.data();
+        const { v4: uuidv4 } = require("uuid");
+
+        const itemId = uuidv4();
+        await documentRef.update({
+            [`tasks.${itemId}.id`]: itemId,
+            [`tasks.${itemId}.title`]: title,
+            [`tasks.${itemId}.is_completed`]: false,
+            [`tasks.${itemId}.start_time_string`]: start_time ? start_time : "",
+        });
+
         const result = "Done";
         return result;
     }

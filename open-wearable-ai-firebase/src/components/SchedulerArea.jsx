@@ -40,8 +40,8 @@ const SchedulerArea = () => {
                                 <TableCell align="left" component="th" scope="row" color={'secondary'}>
                                     <Typography variant="body1" >{task.title}</Typography>
                                 </TableCell>
-                                {/* <TableCell align="right" >{task.is_completed ? '✅' : '🔲'}</TableCell> */}
-                                <TableCell align="right" >{'🔲'}</TableCell>
+                                <TableCell align="right" >{task.is_completed ? '✅' : '🔲'}</TableCell>
+                                {/* <TableCell align="right" >{'🔲'}</TableCell> */}
                                 {/* <TableCell align="right">
                                                         <IconButton
                                                             disabled={false}
