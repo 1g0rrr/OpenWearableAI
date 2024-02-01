@@ -16,9 +16,9 @@ const FirestoreContext = createContext();
 const FirestoreProvider = ({ children }) => {
 
     const navigate = useNavigate();
-    const showCommonSnackbar = useCommonSnackbarsContext();
     const confirm = useConfirm();
 
+    const [userProfile, setUserProfile] = useState({});
     const [currentDocument, setCurrentDocument] = useState({});
 
     const tasksArray = Object.values(currentDocument?.tasks ?? {});
@@ -42,6 +42,21 @@ const FirestoreProvider = ({ children }) => {
     // Subsribe to user data
     useEffect(() => {
 
+        const itemRef = doc(db, "users", "dummy_user");
+        console.log('itemRef', itemRef)
+        const unsubscribe = onSnapshot(itemRef, (querySnapshot) => {
+            const curDocument = querySnapshot.data();
+            curDocument.ref = itemRef;
+            setUserProfile(curDocument);
+        });
+        return () => {
+            unsubscribe();
+        };
+    }, [])
+
+    // Subsribe to day data
+    useEffect(() => {
+
         const itemRef = doc(db, "users", "dummy_user", "dailyObjects", "dummy_date");
         console.log('itemRef', itemRef)
         const unsubscribe = onSnapshot(itemRef, (querySnapshot) => {
@@ -54,21 +69,23 @@ const FirestoreProvider = ({ children }) => {
         return () => {
             unsubscribe();
         };
-    }, [navigate])
+    }, [])
 
 
     const addTextMessageToAssistant = useCallback(async function (textMessage) {
 
         const fetchUrl = ADD_TEXT_URL;
 
+        console.log('textMessage', textMessage)
         const response = await axios.post(fetchUrl, {
             textMessage: textMessage,
         }).catch(err => {
             console.log('err', err);
         });
+        console.log('response', response)
         const responseText = response?.data?.responseText;
         console.log('translatedText', responseText)
-        // return translatedText;
+        return responseText;
 
         // const { responseText, base64 } = result.data
 
@@ -81,6 +98,7 @@ const FirestoreProvider = ({ children }) => {
             addTextMessageToAssistant,
             currentDocument,
             tasksArray,
+            userProfile,
         }}>
             {children}
         </FirestoreContext.Provider>

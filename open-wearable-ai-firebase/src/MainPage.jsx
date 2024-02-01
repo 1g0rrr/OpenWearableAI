@@ -11,6 +11,8 @@ import SchedulerArea from './components/SchedulerArea'
 import NotesArea from './components/NotesArea'
 import ChatWithAIArea from './components/ChatWithAIArea'
 import MemoryArea from './components/MemoryArea'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db } from './services/firebase';
 
 const MainPage = () => {
     const [count, setCount] = useState(0)
@@ -29,7 +31,14 @@ const MainPage = () => {
 
     }
 
+    async function deleteThread() {
+        const itemRef = doc(db, "users", "dummy_user");
+        updateDoc(itemRef, {
+            threadId: null,
+            assistantId: null,
+        });
 
+    }
 
     async function listMessages() {
 
@@ -51,10 +60,11 @@ const MainPage = () => {
                 message: messageObj.content[0].text.value,
                 createdAt: messageObj.created_at,
                 runId: messageObj.run_id,
+                isAssistant: messageObj.role == "assistant",
             }
         });
 
-        _messages.reverse();
+        // _messages.reverse();
 
 
         setMessages(_messages);
@@ -102,7 +112,7 @@ const MainPage = () => {
                             <SchedulerArea />
                         </Box>
                     </Box>
-                    {/* <Box sx={{
+                    <Box sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         width: '40vw',
@@ -116,9 +126,9 @@ const MainPage = () => {
                         flexDirection: 'column',
                         width: '30vw',
                     }}>
-                        <Typography variant="h5" color="initial">Chat (Dummy)</Typography>
-                        <ChatWithAIArea />
-                    </Box> */}
+                        <Typography variant="h5" color="initial">Chat</Typography>
+                        <ChatWithAIArea messages={messages} />
+                    </Box>
                 </Box>
 
 
@@ -129,8 +139,12 @@ const MainPage = () => {
                     {/* <button onClick={() => handleStart()}>Start</button> */}
                     {/* <button onClick={() => pauseRecording()}>Pause</button> */}
                     {/* <button onClick={() => handleStop()}>Stop</button> */}
+                    AssistantId: {firestoreContext.userProfile?.assistantId}<br />
+                    ThreadId: {firestoreContext.userProfile?.threadId}<br />
+
                     <button onClick={() => sendMessageToAssistant()}>sendMessageToAssistant</button>
-                    <button onClick={() => listMessages()}>List messages</button>
+                    <button onClick={() => listMessages()}>Update messages</button>
+                    <button onClick={() => deleteThread()}>Delete thread</button>
                 </div>
                 <TextMessageInput />
             </Box>

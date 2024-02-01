@@ -30,7 +30,7 @@ export function CommonSnackbarsProvider({ children }) {
             </CommonSnackbarsContext.Provider>
             <Snackbar
                 open={isSnackbarOpen}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                anchorOrigin={{ vertical: 'center', horizontal: 'center' }}
                 autoHideDuration={6000}
                 onClose={() => setIsSnackbarOpen(false)}
             >

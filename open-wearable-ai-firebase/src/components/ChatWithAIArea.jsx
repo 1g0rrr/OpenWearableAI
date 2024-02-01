@@ -3,7 +3,8 @@ import React from 'react'
 import { MessageLeft, MessageRight } from './Message'
 import MicIcon from '@mui/icons-material/Mic';
 
-const ChatWithAIArea = () => {
+const ChatWithAIArea = ({ messages }) => {
+    console.log('ChatWithAIArea', messages)
     return (
         <Box sx={{
             display: 'flex',
@@ -14,13 +15,14 @@ const ChatWithAIArea = () => {
             mb: 15,
             // width: '100%',
         }}>
-            {Array.from(Array(4)).map((i) => <Box
+            {messages?.map((mes) => <Box
                 sx={{
                     // bgcolor: 'green',
-                }} key={i}
+                }} key={mes.id}
             >
-                <MessageLeft message="Hello, how are you?" />
-                <MessageRight message="I'm fine, thanks?" />
+                {mes.isAssistant && <MessageLeft message={mes.message} />}
+                {!mes.isAssistant && <MessageRight message={mes.message} />}
+                {/* <MessageRight message="I'm fine, thanks?" /> */}
 
             </Box>)}
             {/* <Box sx={{ mb: 20, mt: 8 }}>

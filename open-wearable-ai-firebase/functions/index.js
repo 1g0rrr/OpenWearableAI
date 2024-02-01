@@ -33,6 +33,18 @@ async function _addTextMessageToAssistant(textMessage) {
         apiKey: process.env.OPENAI_API_KEY,
     });
 
+    const { getFirestore } = require("firebase-admin/firestore");
+    const documentRef = getFirestore().collection("users").doc("dummy_user");
+    const documentRaw = await documentRef.get();
+    const documentData = documentRaw.data();
+
+    let assistantId = documentData?.assistantId;
+    let threadId = documentData?.threadId;
+    console.log("assistantId", assistantId);
+    console.log("threadId", threadId);
+
+
+
     const AddTaskSkill = require("./skills/Tasks/AddTaskSkill.js");
     const GetTasksSkill = require("./skills/Tasks/GetTasksSkill.js");
     const DeleteTaskSkill = require("./skills/Tasks/DeleteTaskSkill.js");
@@ -46,46 +58,94 @@ async function _addTextMessageToAssistant(textMessage) {
         new EditTaskSkill(),
     ];
 
-    const thread = await openai.beta.threads.create();
-    const pedant_agent = await OpenAIAssistantRunnable.createAssistant({
-        name: "Personal paid pedant",
-        instructions: "You are personal paid helpfull assistant. Answer super concise until user asked for more information.",
-        model: "gpt-4-1106-preview",
-        // model: "gpt-4-0613",
-        // model: "gpt-3.5-turbo-1106",
-        language: "en",
-        tools: functional_tools,
-        asAgent: true,
-    });
+    let openAIAssistant = null;
+    if (!assistantId) {
+        openAIAssistant = await OpenAIAssistantRunnable.createAssistant({
+            name: "Personal paid pendant",
+            instructions: "You are personal paid helpfull assistant. Answer super concise until user asked for more information.",
+            model: "gpt-4-1106-preview",
+            // model: "gpt-4-0613",
+            // model: "gpt-3.5-turbo-1106",
+            pollIntervalMs: 500,
+            language: "en",
+            tools: functional_tools,
+            asAgent: true,
+            assistantId: "as_id_igor",
+        });
+
+        assistantId = openAIAssistant.assistantId;
+
+        const { getFirestore } = require("firebase-admin/firestore");
+        const documentRef = getFirestore().collection("users").doc("dummy_user");
+        await documentRef.update({ "assistantId": assistantId, });
+
+
+    } else {
+        openAIAssistant = new OpenAIAssistantRunnable({
+            assistantId: assistantId,
+            asAgent: true,
+            pollIntervalMs: 500,
+        });
+    }
+
+    // const run = await openAIAssistant.invoke({
+    //     content: textMessage,
+    // });
+    // console.log("run", run);
 
     const { AgentExecutor } = require("langchain/agents");
 
     const agentExecutor = AgentExecutor.fromAgentAndTools({
-        agent: pedant_agent,
+        agent: openAIAssistant,
         tools: functional_tools,
+        verbose: true,
+        returnIntermediateSteps: true,
     });
 
-    const assistantResponse = await agentExecutor.invoke({
-        // threadId: "thread_Z1fzbqncUU979lKBTVNkAuSf",
-        // content: "My name is Igor",
+    let agentResponse = null
+    if (!threadId) {
+        const thread = await openai.beta.threads.create();
+        console.log("thread", thread);
+        threadId = thread.id;
+
+        const { getFirestore } = require("firebase-admin/firestore");
+        const documentRef = getFirestore().collection("users").doc("dummy_user");
+        await documentRef.update({ "threadId": threadId, });
+
+        // agentResponse = await agentExecutor.invoke({
+        //     content: textMessage,
+        // });
+        // console.log(agentResponse)
+        // threadId = agentResponse?.threadId;
+        // console.log("threadId", threadId);
+    }
+
+    agentResponse = await agentExecutor.invoke({
+        // threadId: "thread_NrXKa7MNbqGMKPMOEOrvv2cK",
+        threadId: threadId,
         content: textMessage,
     });
-    // assistant.invoke()
-    const responseText = assistantResponse.output;
-    // console.log("assistantResponse", assistantResponse);
 
-    const mp3Response = await openai.audio.speech.create({
-        model: "tts-1",
-        voice: "alloy",
-        input: responseText,
-        response_format: "flac",
-        language: "en",
-    });
+    console.log("agentExecutor", agentExecutor.agent.runnable)
 
-    const buffer = await mp3Response.arrayBuffer();
-    const base64Audio = Buffer.from(buffer).toString("base64");
+    const responseText = agentResponse?.output;
+    // console.log("agentResponse", agentResponse);
+
+    // const mp3Response = await openai.audio.speech.create({
+    //     model: "tts-1",
+    //     voice: "alloy",
+    //     input: responseText,
+    //     response_format: "flac",
+    //     language: "en",
+    // });
+
+    // const buffer = await mp3Response.arrayBuffer();
+    // const base64Audio = Buffer.from(buffer).toString("base64");
     // console.log(responseText);
-    return { base64Audio: base64Audio, responseText: responseText };
+    return {
+        // base64Audio: base64Audio, 
+        responseText: responseText
+    };
 }
 
 
@@ -116,8 +176,19 @@ exports.openaddtextmessagetoassistant1 = functions.runWith({
 
 exports.listmessages = onCall(async (request) => {
     const openai = new OpenAI(process.env.OPENAI_API_KEY)
+
+    const { getFirestore } = require("firebase-admin/firestore");
+    const documentRef = getFirestore().collection("users").doc("dummy_user");
+    const documentRaw = await documentRef.get();
+    const documentData = documentRaw.data();
+
+    const assistantId = documentData?.assistantId;
+    const threadId = documentData?.threadId;
+    console.log("assistantId", assistantId);
+    console.log("threadId", threadId);
+
     const threadMessages = await openai.beta.threads.messages.list(
-        "thread_i7j6BXpja6bpxSsAbOcGM06B"
+        threadId
     );
 
     threadMessages.data.forEach((message) => {
