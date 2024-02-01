@@ -7,7 +7,7 @@ class EditTaskSkill extends StructuredTool {
         taskId: z.string().describe("Id of the task in UUID format"),
         start_time: z.string().describe("Time for starting the event or task in format HH:MM"),
         title: z.string().describe("Title of the event or task"),
-        isDone: z.boolean().describe("Is task done?").default(true),
+        isDone: z.boolean().describe("Is task done?").default(false),
     });
 
     name = "done_task";
@@ -32,8 +32,8 @@ class EditTaskSkill extends StructuredTool {
         // Delete the field
         await documentRef.update({
             [`tasks.${taskId}.start_time_string`]: start_time ? start_time : "",
-            [`tasks.${taskId}.title`]: input.title,
-            [`tasks.${taskId}.is_completed`]: input.isDone,
+            [`tasks.${taskId}.title`]: title,
+            [`tasks.${taskId}.is_completed`]: isDone,
         }).catch((error) => {
             console.log("Error deleting task", error);
         });

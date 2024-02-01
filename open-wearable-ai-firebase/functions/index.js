@@ -103,7 +103,7 @@ exports.webaddtextmessagetoassistant = functions.runWith({
     return;
 });
 
-exports.openaddtextmessagetoassistant = functions.runWith({
+exports.openaddtextmessagetoassistant1 = functions.runWith({
     timeoutSeconds: 60
 }).https.onRequest(async (req, res) => {
     const textMessage = req.body.textMessage;

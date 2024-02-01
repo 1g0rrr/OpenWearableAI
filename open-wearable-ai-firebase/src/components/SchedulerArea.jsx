@@ -25,7 +25,7 @@ const SchedulerArea = () => {
                             <TableCell align="left" component="th" scope="row" color={'secondary'}>
                                 <Typography variant="body2" >Name</Typography>
                             </TableCell>
-                            <TableCell align="right" width={10} >Done</TableCell>
+                            <TableCell align="right" width={10} >Completed</TableCell>
                             <TableCell align="right" size='small'>
                                 {/* <IconButton size='small' onClick={() => { }}><Delete />
                                     </IconButton> */}

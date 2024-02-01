@@ -4,7 +4,7 @@ import wave
 import sched
 import sys
 from gpiozero import Button
-from gpiozero import LED
+from gpiozero import LED, PingServer
 from signal import pause
 import os
 from io import BytesIO
@@ -18,7 +18,7 @@ import io
 import RPi.GPIO as GPIO
 
 from dotenv import load_dotenv
-dotenv_path = '/home/igor/openwearableai_raspberrypi/.env'
+dotenv_path = '/home/igor/firmware/.env'
 load_dotenv(dotenv_path)
  
 CHUNK = 1024
@@ -31,7 +31,11 @@ p = pyaudio.PyAudio()
 frames = []
 stream = None
 
-# 
+
+is_connected = True
+is_busy = False
+
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(19, GPIO.OUT)
 GPIO.output(19, 0)
@@ -48,10 +52,13 @@ green = LED(12)
 green.on()
 
 def send_to_whisper():
+    global is_busy, red, green
+
 # use the audio file as the audio source
     print('recognizer')
         # red.blink(0, 1, 1)
     # red.on()
+    is_busy = True
     red.blink(0.05, 0.3)
     green.on()
 
@@ -72,10 +79,14 @@ def send_to_whisper():
     print(transcript)
     red.blink(0.05, 0.1)
 
+    IS_DEBUG = os.getenv("IS_DEBUG_SERVER")
+    DEBUG_SERVER_URL = os.getenv("DEBUG_SERVER_URL")
+    PROD_SERVER_URL = os.getenv("PROD_SERVER_URL")
  
-    url ="https://us-central1-shinyclubapp.cloudfunctions.net/openaddtextmessagetoassistant"
+    url = DEBUG_SERVER_URL if IS_DEBUG == 'true' else PROD_SERVER_URL
+
     r = requests.post(url, data={'textMessage': transcript})
-    print(r)
+    print(r) 
     testresObj = json.loads(r.text)
     base64_encoded_sound_data = testresObj['base64']
     # red.off()
@@ -94,6 +105,9 @@ def send_to_whisper():
         pygame.time.wait(100)       
 
     red.blink(0.2, 2)
+
+    is_busy = False
+    check_status()
 
 
 def on_press(self):
@@ -140,22 +154,44 @@ def on_release(self):
 
 # red.on()
 
+
+
+def wifi_activated():
+    print("wifi_activated")
+    global is_connected
+
+    is_connected = True
+    check_status()
+
+def wifi_deactivated():
+    print("wifi_deactivated")
+    global is_connected
+    is_connected = False
+    check_status()
+
+def check_status():
+    global is_connected, is_busy, red, green
+    print("check_status")
+    print(is_connected)
+    print(is_busy)
+
+    if not is_busy:
+        if is_connected:
+            red.blink(0.2, 2)
+        else:
+            red.blink(0.5, 0.5)
+
+
 button.when_pressed = on_press
 button.when_released = on_release
 
+google = PingServer('google.com', 2)
+
+google.when_activated = wifi_activated
+google.when_deactivated = wifi_deactivated
+
 print ("Press and hold the 'r' key to begin recording")
 print ("Release the 'r' key to end recording")
-
-
-# pygame.mixer.init()
-# # fixdata = "data:audio/mp3;base64," + base64_encoded_sound_data
-# sound_data = base64.b64decode(base64_encoded_sound_data)
-# # print(sound_data)
-# sound_file = io.BytesIO(sound_data)
-# sound = pygame.mixer.Sound(sound_file)
-# ch = sound.play()
-# while ch.get_busy():
-#     pygame.time.wait(100)
 
 
 pause()
